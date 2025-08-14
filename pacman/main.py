@@ -101,7 +101,7 @@ class PacMan:
         self.blue  = (32, 96, 64)
         scale = 20
 
-        self.window = pg.display.set_mode((scale * 27.5, scale * 200))
+        self.window = pg.display.set_mode((scale * 37, scale * 31))
         pg.font.init()
         self.font = pg.font.SysFont("Courier New", scale * 2, bold=True)
         self.clock = pg.time.Clock()
@@ -201,6 +201,22 @@ class PacMan:
         ghost_harmless_1       = pg.image.load('img/fan_roxo8.png')
         self.ghost_harmless_0 = pg.transform.scale(ghost_harmless_0, (self.scale * 1.3, self.scale * 1.3))
         self.ghost_harmless_1 = pg.transform.scale(ghost_harmless_1, (self.scale * 1.3, self.scale * 1.3))
+
+        vida5 = pg.image.load('img/vida5.png')
+        vida4 = pg.image.load('img/vida4.png')
+        vida3 = pg.image.load('img/vida3.png')
+        vida2 = pg.image.load('img/vida2.png')
+        vida1 = pg.image.load('img/vida1.png')
+        vida0 = pg.image.load('img/vida0.png')
+
+        self.vida_imgs = [
+            pg.transform.scale(vida0, (self.scale * 3, self.scale)),  # 0 vidas
+            pg.transform.scale(vida1, (self.scale * 3, self.scale)),  # 1 vida
+            pg.transform.scale(vida2, (self.scale * 3, self.scale)),  # 2 vidas
+            pg.transform.scale(vida3, (self.scale * 3, self.scale)),  # 3 vidas
+            pg.transform.scale(vida4, (self.scale * 3, self.scale)),  # 4 vidas
+            pg.transform.scale(vida5, (self.scale * 3, self.scale)),  # 5 vidas
+    ]
 
         # mapa original
         self.map = [
@@ -949,26 +965,20 @@ class PacMan:
                         ['#','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','#'],
                         ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#']]
 
-
     def scoreboard(self):
-        score_text = self.font.render(f'Score: {str(self.score)}', 1, self.white)
-        lives_text = self.font.render(f'Lives: {str(max(self.lives, 0))}X', 1, self.white)
-        x_score_pos = (self.window.get_width() / 2) - (score_text.get_width() / 2)
-        y_score_pos = self.scale * 30.75
-        x_lives_pos = (self.window.get_width() / 2) - (lives_text.get_width() / 2)
-        y_lives_pos = self.scale * 33
-        self.window.blit(score_text, (x_score_pos, y_score_pos))
-        self.window.blit(lives_text, (x_lives_pos, y_lives_pos))
-        if self.lives == -1:
-            end_text = self.font.render('game', 1, self.white)
-            game_text = self.font.render('over', 1, self.white)
-            x_end_pos = (self.window.get_width() / 2) - (end_text.get_width() / 2)
-            y_end_pos = self.scale * 12.25
-            x_game_pos = (self.window.get_width() / 2) - (game_text.get_width() / 2)
-            y_game_pos = self.scale * 13.75
-            self.window.blit(end_text, (x_end_pos, y_end_pos))
-            self.window.blit(game_text, (x_game_pos, y_game_pos))
+        # Posição inicial lateral (direita do labirinto)
+        x_lado = len(self.map[0]) * self.scale + self.scale  # um pouco afastado do labirinto
+        y_lado = self.scale  # começa no topo
 
+        # Tamanho maior das imagens de vida
+        img_width = self.scale * 14
+        img_height = self.scale * 14
+
+        vidas_index = max(self.lives, 0)
+        img = pg.transform.scale(self.vida_imgs[vidas_index], (img_width, img_height))
+
+        # Desenha as vidas na lateral direita
+        self.window.blit(img, (x_lado, y_lado))
 
 
 
