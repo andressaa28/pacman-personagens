@@ -4,7 +4,7 @@ import random
 
 def escolher_personagem():
     pg.init()
-    scale = 26
+    scale = 23
     window_width = int(scale * 27.5)
     window_height = int(scale * 28)
     window = pg.display.set_mode((window_width, window_height))
@@ -99,9 +99,9 @@ class PacMan:
         self.white = (255, 255, 255)
         self.black = (46, 139, 87)
         self.blue  = (32, 96, 64)
-        scale = 18
+        scale = 20
 
-        self.window = pg.display.set_mode((scale * 27.5, scale * 35))
+        self.window = pg.display.set_mode((scale * 27.5, scale * 200))
         pg.font.init()
         self.font = pg.font.SysFont("Courier New", scale * 2, bold=True)
         self.clock = pg.time.Clock()
