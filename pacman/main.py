@@ -1,6 +1,64 @@
 import pygame as pg
 import random
 
+def tela_inicial():
+    pg.init()
+
+    scale = 23
+    window_width = int(scale * 27.5)
+    window_height = int(scale * 28)
+    window = pg.display.set_mode((window_width, window_height))
+    pg.display.set_caption("Pac-Man")
+    
+    # Carregar imagem do título
+    titulo_img = pg.image.load('img/titulo.png').convert_alpha()
+
+    # Mantém proporção
+    largura_original, altura_original = titulo_img.get_size()
+    proporcao = largura_original / altura_original
+
+    largura_max = int(window_width * 0.9)
+    altura_max = int(window_height * 0.5)
+
+    if largura_original / altura_original > largura_max / altura_max:
+        nova_largura = largura_max
+        nova_altura = int(largura_max / proporcao)
+    else:
+        nova_altura = altura_max
+        nova_largura = int(altura_max * proporcao)
+
+    titulo_img = pg.transform.scale(titulo_img, (nova_largura, nova_altura))
+    font_sub = pg.font.SysFont("Courier New", int(scale * 1), bold=True)
+
+    clock = pg.time.Clock()
+    rodando = True
+
+    while rodando:
+        clock.tick(30)
+        window.fill((46, 139, 87))  # fundo verde
+
+        # Desenha título centralizado
+        window.blit(
+            titulo_img,
+            ((window_width - titulo_img.get_width()) // 2,
+             (window_height - titulo_img.get_height()) // 5)
+        )
+
+        # Texto instrução
+        sub = font_sub.render("Pressione ENTER para iniciar", True, (255, 255, 255))
+        window.blit(
+            sub,
+            ((window_width - sub.get_width()) // 2, window_height // 2 + nova_altura // 2)
+        )
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                quit()
+            if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:  # Enter
+                rodando = False
+
+        pg.display.update()
 
 def escolher_personagem():
     pg.init()
@@ -103,7 +161,7 @@ class PacMan:
 
         self.window = pg.display.set_mode((scale * 37, scale * 31))
         pg.font.init()
-        self.font = pg.font.SysFont("Courier New", scale * 2, bold=True)
+        self.font = pg.font.SysFont("Courier New", scale * 1, bold=True)
         self.clock = pg.time.Clock()
         self.scale = scale
         self.sprite_frame = 0
@@ -201,22 +259,6 @@ class PacMan:
         ghost_harmless_1       = pg.image.load('img/fan_roxo8.png')
         self.ghost_harmless_0 = pg.transform.scale(ghost_harmless_0, (self.scale * 1.3, self.scale * 1.3))
         self.ghost_harmless_1 = pg.transform.scale(ghost_harmless_1, (self.scale * 1.3, self.scale * 1.3))
-
-        vida5 = pg.image.load('img/vida5.png')
-        vida4 = pg.image.load('img/vida4.png')
-        vida3 = pg.image.load('img/vida3.png')
-        vida2 = pg.image.load('img/vida2.png')
-        vida1 = pg.image.load('img/vida1.png')
-        vida0 = pg.image.load('img/vida0.png')
-
-        self.vida_imgs = [
-            pg.transform.scale(vida0, (self.scale * 3, self.scale)),  # 0 vidas
-            pg.transform.scale(vida1, (self.scale * 3, self.scale)),  # 1 vida
-            pg.transform.scale(vida2, (self.scale * 3, self.scale)),  # 2 vidas
-            pg.transform.scale(vida3, (self.scale * 3, self.scale)),  # 3 vidas
-            pg.transform.scale(vida4, (self.scale * 3, self.scale)),  # 4 vidas
-            pg.transform.scale(vida5, (self.scale * 3, self.scale)),  # 5 vidas
-    ]
 
         # mapa original
         self.map = [
@@ -883,7 +925,7 @@ class PacMan:
 
 
     def restart_ghost_collision(self):
-        if self.sprite_frame == 60 and self.end_game == True and self.lives > -1:
+        if self.sprite_frame == 60 and self.end_game == True and self.lives > 0:
             self.end_game = False
             self.harmless_mode = False
             self.harmless_mode_timer = 0
@@ -966,27 +1008,39 @@ class PacMan:
                         ['#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#','#']]
 
     def scoreboard(self):
-        # Posição inicial lateral (direita do labirinto)
-        x_lado = len(self.map[0]) * self.scale + self.scale  # um pouco afastado do labirinto
-        y_lado = self.scale  # começa no topo
 
-        # Tamanho maior das imagens de vida
-        img_width = self.scale * 14
-        img_height = self.scale * 14
+        max_vidas = 5
 
-        vidas_index = max(self.lives, 0)
-        img = pg.transform.scale(self.vida_imgs[vidas_index], (img_width, img_height))
+        # Posição inicial (canto superior direito)
+        x_base = len(self.map[0]) * self.scale + self.scale
+        y_base = self.scale
 
-        # Desenha as vidas na lateral direita
-        self.window.blit(img, (x_lado, y_lado))
+        # Carregar a imagem do coração
+        coracao_img = pg.image.load('img/coracao.png')  # coloque seu coração
+        coracao_img = pg.transform.scale(coracao_img, (self.scale * 2, self.scale * 2))
 
+        # Desenha um coração para cada vida restante
+        for i in range(self.lives):
+            y = y_base + (coracao_img.get_height() + 5) * i  # 5px de espaço entre corações
+            self.window.blit(coracao_img, (x_base, y))
 
+        coracao_vazio = pg.image.load('img/coracao_vazio.png')  # imagem cinza/transparente
+        coracao_vazio = pg.transform.scale(coracao_vazio, (self.scale * 2, self.scale * 2))
+        for i in range(self.lives, max_vidas):
+            y = y_base + (coracao_vazio.get_height() + 5) * i
+            self.window.blit(coracao_vazio, (x_base, y))
 
+        # Calcula posição da pontuação (logo abaixo dos corações)
+        altura_total = (coracao_img.get_height() + 5) * max_vidas
+        y_pontuacao = y_base + altura_total + 10  # 10px de espaço abaixo dos corações
+
+        # Renderiza e desenha a pontuação
+        texto_pontuacao = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
+        self.window.blit(texto_pontuacao, (x_base, y_pontuacao))
+
+tela_inicial()
 selecao = escolher_personagem()
 jogo = PacMan(26, selecao)
-
-
-
 
 while True:
     for event in pg.event.get():
@@ -1016,4 +1070,3 @@ while True:
 
 
     pg.display.update()
-
