@@ -33,6 +33,16 @@ def tela_inicial():
     clock = pg.time.Clock()
     rodando = True
 
+    pg.joystick.init()
+    if pg.joystick.get_count() > 0:
+        joystick = pg.joystick.Joystick(0)
+        joystick.init()
+        print(f"Joystick detectado: {joystick.get_name()}")
+    else:
+        joystick = None
+        print("Nenhum joystick encontrado")
+
+
     while rodando:
         clock.tick(30)
         window.fill((46, 139, 87))  # fundo verde
@@ -1052,7 +1062,6 @@ while True:
             if pg.key.name(event.key) == 'escape':
                 pg.quit()
                 quit()
-
 
     # Game
     jogo.clock.tick(60)
